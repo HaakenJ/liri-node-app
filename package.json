@@ -1,0 +1,22 @@
+{
+  "name": "liri-node-app",
+  "version": "1.0.0",
+  "description": "Siri-like app for searching songs, concerts, and movies.",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/HaakenJ/liri-node-app.git"
+  },
+  "author": "Haakasaurus",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/HaakenJ/liri-node-app/issues"
+  },
+  "homepage": "https://github.com/HaakenJ/liri-node-app#readme",
+  "dependencies": {
+    "axios": "^0.19.0"
+  }
+}
