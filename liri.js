@@ -9,6 +9,18 @@ const fs = require('fs');
 let command = process.argv[2],
     argument = process.argv.slice(3).join(' ');
 
+// Record the search command and argument to data file.
+recordData(command);
+recordData(argument);
+
+/* This API throws an error both if no artist is provided but also if no 
+    concerts are found for that artist.  Rather than having an error
+    displayed to the user, it is more useful to inform the user exactly
+    what they did wrong, i.e. tell them to enter an artist or tell them
+    that there are no concerts found for that artist.  To handle this error
+    I am using an async function with the 'await' keyword in a try-catch block.
+    To 'try' the API call we must await the response from the call rather than
+    moving on to the next line as usual. */
 async function concertThis(arg) {
     let artist = arg;
     try {
@@ -19,9 +31,16 @@ async function concertThis(arg) {
             console.log(`\nVenue: ${response.data[concert].venue.name}`);
             console.log(`Location: ${response.data[concert].venue.city}, ${response.data[concert].venue.region} ${response.data[concert].venue.country}`);
             console.log(`Date: ${moment(response.data[concert].venue.datetime).format('MM/DD/YYYY')}\n`);
+
+            // Record current data to file.
+            recordData(`Venue: ${response.data[concert].venue.name}`);
+            recordData(`Location: ${response.data[concert].venue.city}, ${response.data[concert].venue.region} ${response.data[concert].venue.country}`);
+            recordData(`Date: ${moment(response.data[concert].venue.datetime).format('MM/DD/YYYY')}`);
+            
         })
-        console.log('---------------------------------------------------')
+        console.log('---------------------------------------------------');
     } catch (err) {
+        // If the user doesn't provide an argument then an error is thrown.
         (!arg) ? 
         console.log('Please enter an artist') : 
         console.log(`No results were found for ${arg}`);
@@ -47,6 +66,13 @@ function spotifyThis(arg) {
             console.log(`Preview Link: ${data.tracks.items[i].external_urls.spotify}`);
             console.log(`Album: ${data.tracks.items[i].album.name}`);
             console.log('---------------------------------------------------------------------\n');
+
+            // Record data to file.
+            recordData(`Artist: ${data.tracks.items[i].artists[0].name}`);
+            recordData(`Track Name: ${data.tracks.items[i].name}`);
+            recordData(`Preview Link: ${data.tracks.items[i].external_urls.spotify}`);
+            recordData(`Album: ${data.tracks.items[i].album.name}`);
+            
         }
     })
 }
@@ -82,12 +108,42 @@ function movieThis(arg) {
                 console.log(`Plot: ${response.data.Plot}`);
                 console.log(`Cast: ${response.data.Actors}`);
                 console.log('------------------------------------------------------------------------------\n');
+
+
+                // Record data to file.
+                recordData(`Title: ${response.data.Title}`);
+                recordData(`Year: ${response.data.Year}`);
+
+                /* Sometimes there are no ratings supplied which will throw
+                    an index error. */
+                try {
+                    recordData(`IMDB Rating: ${response.data.Ratings[0].Value}`);
+                } catch {
+                    recordData(`IMDB Rating: No rating`);
+                }
+                try {
+                    recordData(`Rotten Tomatoes Rating: ${response.data.Ratings[1].Value}`);
+                } catch {
+                    recordData(`Rotten Tomatoes Rating: No rating`);
+                }
+
+                recordData(`Country: ${response.data.Country}`);
+                recordData(`Language: ${response.data.Language}`);
+                recordData(`Plot: ${response.data.Plot}`);
+                recordData(`Cast: ${response.data.Actors}`);
+                
             } else {
                 console.log(response.data.Error);
             }
 
 
         })
+}
+
+function recordData(data) {
+    fs.appendFile('log.txt', data + ', ', (err) => {
+        if (err) throw err;
+    })
 }
 
 switch (command) {
